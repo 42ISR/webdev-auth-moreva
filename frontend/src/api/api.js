@@ -1,4 +1,5 @@
 import axios from "axios"; 
+import { useUserStore } from "../store/useUserStore";
 
 const apiInstance = axios.create({
     baseURL: "https://api.kitek-pg.ru/api/feedback/",
@@ -7,6 +8,16 @@ const apiInstance = axios.create({
         Accept: "application/json",
 
     },
+})
+
+apiInstance.interceptors.request.use(config => {
+    const {user} = useUserStore.getState()
+
+    if (user?.token) {
+        config.headers.Authorization = `Bearer ${user.token}`
+    }
+
+    return config
 })
 
 const registerUser = async (user) => {
@@ -24,8 +35,57 @@ const getMessages = async () => {
     return res
 }
 
+const getMessage = async () => {
+    const res = apiInstance.get("/messages")
+    return res
+}
+
+const sendMessage = async (message) => {
+    const res = apiInstance.post("/messages", message)
+    return res
+}
+
+const getMyMessages = async () => {
+    const res = await apiInstance.get("/my-messages")
+    return res
+}
+
+const getStats = async () => {
+    const res = await apiInstance.get("/stats")
+    return res
+}
+
+const authMe = async () => {
+    const res = await apiInstance.get(`/auth/me`)
+    return res
+}
+
+const reportMessage = async (id) => {
+    const res = await apiInstance.get(`/messages/${id}/report`)
+    return res
+}
+
+const likeMessage = async (id) => {
+    const res = await apiInstance.post(`/messages/${id}/like`)
+    return res
+}
+
+const deleteMessage = async (id) => {
+    const res = await apiInstance.delete(`/messages/${id}`)
+    return res
+}
+
+
 export const api = {
     loginUser,
     registerUser,
-    getMessages
+    getMessages,
+    sendMessage,
+    getMessage,
+    getMyMessages,
+    getStats, 
+    reportMessage, 
+    deleteMessage, 
+    likeMessage,
+    authMe
 }
